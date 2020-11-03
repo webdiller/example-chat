@@ -2,8 +2,10 @@
 // importing
 const express = require("express");
 const mongoose = require("mongoose");
-const Pusher = require("pusher");
+const passport = require("passport");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+require("dotenv").config();
 
 const Messages = require("./dbMessages.js");
 
@@ -13,21 +15,19 @@ const port = process.env.PORT || 5000;
 const server = require("http").Server(app);
 const socket = require("socket.io")(server);
 
-// const pusher = new Pusher({
-//   appId: "1096946",
-//   key: "2b64eb244e80006c5fb4",
-//   secret: "57a750042b859cef9f38",
-//   cluster: "eu",
-//   encrypted: true,
-// });
+const messangerRoutes = require('./routes/api/messanger');
+const userRoutes = require('./routes/api/users');
 
 // middleware
-app.use(express.json());
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(passport.initialize());
+require('./config/passport')(passport);
 
 // DB config
 const connectionUrl =
-  "mongodb+srv://pandora:rootQwerty@cluster0.kgjvz.mongodb.net/pandoraEndDEV?retryWrites=true&w=majority";
+  "mongodb+srv://pandora:rootQwerty@cluster0.kgjvz.mongodb.net/messanger?retryWrites=true&w=majority";
 const socketConnection = require("./socket");
 mongoose.connect(
   connectionUrl,
@@ -42,58 +42,9 @@ mongoose.connect(
     socket.on("connection", socketConnection);
   }
 );
-// .catch((err) => console.log(`Database not connected: ${err}`));
 
-// const db = mongoose.connection;
+// API ROUTES
+app.use('/api/chat', messangerRoutes);
+app.use('/api/users', userRoutes);
 
-// db.once("open", () => {
-//   console.log("DB connected");
-
-//   const msgCollection = db.collection("messagecontents");
-//   const changeStream = msgCollection.watch();
-
-//   changeStream.on("change", (change) => {
-//     console.log("A Change occured", change);
-
-//     if (change.operationType === "insert") {
-//       const messageDeatils = change.fullDocument;
-//       pusher.trigger("messages", "inserted", {
-//         name: messageDeatils.name,
-//         message: messageDeatils.message,
-//         timestamp: messageDeatils.timestamp,
-//       });
-//     } else {
-//       console.log("Error triggering Pusher");
-//     }
-//   });
-// });
-
-// ????
-
-// api routes
-app.get("/", (req, res) => res.status(200).send("Hello, World!"));
-
-app.get("/api/v1/messages/sync", (req, res) => {
-  Messages.find((err, data) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send(data);
-    }
-  });
-});
-
-app.post("/api/v1/messages/new", (req, res) => {
-  const dbMessages = req.body;
-
-  Messages.create(dbMessages, (err, data) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(201).send(data);
-    }
-  });
-});
-
-// listen
 server.listen(port, () => console.log(`Listening on http://localhost:${port}`));
