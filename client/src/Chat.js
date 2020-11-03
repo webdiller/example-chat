@@ -20,9 +20,13 @@ function Chat({ messages }) {
   const [input, setInput] = useState("");
   const sendMessage = async (e) => {
     e.preventDefault();
-    const { data: chatMsg } = await axios.post(`/api/chat/create${window.location.pathname}`, {
-      textMessage: input,
-    });
+    const { data: chatMsg } = await axios.post(
+      `/api/chat/create${window.location.pathname}`,
+      {
+        textMessage: input,
+        date: Date.now,
+      }
+    );
 
     socket.emit("broadcast-message", chatMsg);
     updateScroll();
@@ -62,11 +66,13 @@ function Chat({ messages }) {
         {messages.map((message) => (
           <p
             key={message._id}
-            className={`chat__message ${message.received && "chat__reciever"}`}
+            className={`chat__message ${
+              message.userSender && "chat__reciever"
+            }`}
           >
             <span className="chat__name">{message.userSender.username}</span>
             {message.textMessage}
-            <span className="chat__timestamp">{message.timestamp}</span>
+            <span className="chat__timestamp">{message.date}</span>
           </p>
         ))}
       </div>

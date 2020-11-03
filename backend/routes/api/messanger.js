@@ -38,21 +38,13 @@ router.post(
       userSender: req.user._id,
       userReciever: userReciever,
       textMessage: req.body.textMessage,
-    })
-      .populate("userSender", "username email _id")
-      .populate("userReciever", "username email _id");
+    });
 
     newMessage
+      .populate("userSender", "username email _id")
+      .populate("userReciever", "username email _id")
       .save()
-      .then((chatMessage) =>
-        res
-          .status(201)
-          .json(
-            chatMessage
-              .populate("userSender", "username email _id")
-              .populate("userReciever", "username email _id")
-          )
-      );
+      .then((chatMessage) => res.status(201).json(chatMessage));
   }
 );
 
@@ -98,8 +90,8 @@ router.get(
         },
       ],
     })
-      .populate("userSender", "username email _id")
-      .populate("userReciever", "username email _id")
+      .populate(["userSender", "username email _id"])
+      .populate(["userReciever", "username email _id"])
       .then((chat) => {
         if (!chat) {
           return res.status(400).json({ message: "Chat is not defined!" });

@@ -14,7 +14,7 @@ const App = () => {
 
   useEffect(() => {
     socket.connect();
-    axios.get("/api/chat/chat/5fa0e75f183f4e336ccc5597").then((response) => {
+    axios.get(`/api/chat/chat${window.location.pathname}`).then((response) => {
       console.log(response.data);
       setMessages(response.data);
     });
