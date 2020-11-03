@@ -14,7 +14,7 @@ const App = () => {
 
   useEffect(() => {
     socket.connect();
-    axios.get("/api/v1/messages/sync").then((response) => {
+    axios.get("/api/chat/chat/5fa0e75f183f4e336ccc5597").then((response) => {
       console.log(response.data);
       setMessages(response.data);
     });
